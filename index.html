@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Studio 20-in-1 — وب‌اپ پیشرفته</title>
+  <meta name="description" content="یک وب‌اپ تک فایل با 20 ابزار هوش مصنوعی: خلاصه‌سازی، بازنویسی، تولید پرامپت، تحلیل احساسات، کلمات کلیدی و بیشتر." />
+  <style>
+    :root{
+      --bg: #0b0f16;
+      --panel: #121826;
+      --panel-2: #0f1420;
+      --txt: #e7edf7;
+      --sub: #b4c0d3;
+      --primary: #6ea8ff;
+      --accent: #9d7dff;
+      --muted: #2a3346;
+      --border: #1c2434;
+      --ok: #20c997;
+      --warn: #f59f00;
+      --err: #ff6b6b;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.02);
+      --radius: 14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background: radial-gradient(1200px 700px at 80% -10%, rgba(157,125,255,.15), transparent 60%),
+                          radial-gradient(900px 600px at 10% -30%, rgba(110,168,255,.12), transparent 65%),
+                          var(--bg);
+      color:var(--txt); font: 15px/1.6 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Naskh Arabic", "Vazirmatn", Tahoma, Arial;
+    }
+    header{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px clamp(16px, 4vw, 28px); position:sticky; top:0; z-index:10;
+      background: linear-gradient(180deg, rgba(11,15,22,.9), rgba(11,15,22,.6));
+      backdrop-filter: blur(10px); border-bottom:1px solid var(--border);
+    }
+    .brand{display:flex; gap:12px; align-items:center;}
+    .logo{
+      width:40px; height:40px; border-radius:12px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display:grid; place-items:center; box-shadow: var(--shadow); color:white; font-weight:800;
+    }
+    .brand h1{margin:0; font-size:18px}
+    .brand p{margin:0; color:var(--sub); font-size:12px}
+    .row{display:grid; grid-template-columns: 300px 1fr; gap:18px; padding:18px clamp(16px, 4vw, 28px)}
+    @media (max-width: 980px){ .row{grid-template-columns:1fr} }
+    .panel{
+      background: linear-gradient(180deg, rgba(18,24,38,.95), rgba(15,20,32,.95));
+      border:1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+    }
+    .side{padding:16px}
+    .search{position:relative}
+    .search input{
+      width:100%; background: var(--panel-2); border:1px solid var(--border);
+      color:var(--txt); padding:12px 14px; border-radius:10px; outline:none;
+    }
+    .tasks{margin-top:12px; display:flex; flex-direction:column; gap:8px; max-height: calc(100vh - 210px); overflow:auto; padding-right:2px}
+    .task{
+      display:flex; align-items:center; gap:10px; padding:10px; border-radius:10px;
+      background: transparent; border:1px solid transparent; cursor:pointer;
+    }
+    .task:hover{background:rgba(255,255,255,.03); border-color:var(--border)}
+    .task.active{background:linear-gradient(180deg, rgba(110,168,255,.08), rgba(157,125,255,.08)); border-color:transparent}
+    .task .ico{width:32px; height:32px; display:grid; place-items:center; background:var(--panel-2); border-radius:8px; border:1px solid var(--border)}
+    .task .name{font-weight:600}
+    .task .desc{font-size:12px; color:var(--sub)}
+    .settings{margin-top:16px; padding:12px; background:var(--panel-2); border:1px solid var(--border); border-radius:10px}
+    .settings h3{margin:0 0 8px 0; font-size:13px; color:var(--sub)}
+    .settings label{display:block; font-size:12px; color:var(--sub); margin-top:8px}
+    .settings input, .settings select{
+      width:100%; background:#0b1220; border:1px solid var(--border); color:var(--txt);
+      padding:8px 10px; border-radius:8px; outline:none; font-size:13px;
+    }
+
+    .main{display:grid; gap:14px; align-content:start; padding:16px}
+    .hero{
+      padding:14px; border:1px dashed var(--muted); border-radius:12px; background: rgba(255,255,255,.02)
+    }
+    .hero strong{color:var(--primary)}
+    .grid{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+    .card{padding:14px; border:1px solid var(--border); border-radius:12px; background: var(--panel)}
+    .card h3{margin:0 0 10px 0; font-size:14px; color:var(--sub)}
+    textarea, input[type="text"], input[type="number"], select{
+      width:100%; resize:vertical; min-height:120px; background: var(--panel-2); color:var(--txt);
+      border:1px solid var(--border); border-radius:10px; padding:10px; outline:none;
+    }
+    textarea.small{min-height:80px}
+    .inline{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .inline > *{flex:1}
+    .btn{
+      background: linear-gradient(135deg, var(--primary), var(--accent)); color:white; border:none;
+      padding:12px 16px; border-radius:10px; cursor:pointer; font-weight:700; box-shadow: var(--shadow)
+    }
+    .btn.secondary{background:transparent; border:1px solid var(--border); color:var(--txt); box-shadow:none}
+    .btn.ghost{background:transparent; color:var(--sub); border:none}
+    .toolbar{display:flex; gap:10px; align-items:center; justify-content:flex-end}
+    .output{
+      white-space:pre-wrap; word-break:break-word; background: #0c111a; border:1px solid var(--border);
+      border-radius:12px; padding:14px; min-height:180px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
+    }
+    .footer{padding:10px; color:var(--sub); font-size:12px; text-align:center}
+    .chip{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; border:1px solid var(--border); background:rgba(255,255,255,.03); font-size:12px}
+    .status{font-size:12px; color:var(--sub)}
+    .kpi{display:flex; gap:8px; flex-wrap:wrap}
+    .kpi .item{background:rgba(255,255,255,.03); border:1px solid var(--border); padding:8px 10px; border-radius:8px; font-size:12px}
+    .sep{height:1px; background:var(--border); margin:10px 0}
+    .notice{font-size:12px; color:var(--sub)}
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">AI</div>
+    <div>
+      <h1>AI Studio — 20 ابزار هوش مصنوعی در یک صفحه</h1>
+      <p>نسخه سبک، مدرن، قابل انتشار روی GitHub Pages (بدون بک‌اند)</p>
+    </div>
+  </div>
+  <div class="kpi">
+    <div class="item">حالت: <strong id="modeLabel">محلی</strong></div>
+    <div class="item">ابزارها: <strong>20</strong></div>
+    <div class="item status" id="status">آماده</div>
+  </div>
+</header>
+
+<div class="row">
+  <aside class="panel side">
+    <div class="search">
+      <input id="search" placeholder="جستجوی ابزار…" />
+    </div>
+
+    <div class="tasks" id="tasks"></div>
+
+    <div class="settings">
+      <h3>تنظیمات موتور</h3>
+      <label>حالت موتور</label>
+      <select id="engineMode">
+        <option value="local">محلی (بدون API)</option>
+        <option value="openai">LLM سازگار با OpenAI (اختیاری)</option>
+      </select>
+      <div id="llmFields" style="display:none">
+        <label>Base URL</label>
+        <input id="apiBase" placeholder="مثال: https://api.openai.com" />
+        <label>Model</label>
+        <input id="apiModel" placeholder="مثال: gpt-4o-mini" />
+        <label>API Key</label>
+        <input id="apiKey" placeholder="sk-..." />
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="hero panel">
+      <div class="inline" style="justify-content:space-between">
+        <div class="chip">🧭 راهنما: یک ابزار را از ستون چپ انتخاب کنید</div>
+        <div class="inline" style="flex:none; gap:6px">
+          <button class="btn secondary" id="exportBtn">خروجی JSON</button>
+          <button class="btn secondary" id="importBtn">ورود JSON</button>
+          <button class="btn secondary" id="clearBtn">پاکسازی</button>
+        </div>
+      </div>
+      <div class="sep"></div>
+      <div class="notice">می‌توانید بدون کلید هم از نسخه‌ی محلی استفاده کنید. برای بهترین نتایج زبانی/خلاقیت، یک مدل سازگار با OpenAI تنظیم کنید.</div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>ورودی</h3>
+        <textarea id="inputText" placeholder="متن خود را وارد کنید…"></textarea>
+        <div id="dynamicInputs" class="inline" style="margin-top:10px"></div>
+      </div>
+
+      <div class="card">
+        <h3>خروجی</h3>
+        <div class="toolbar">
+          <button class="btn secondary" id="copyBtn">کپی</button>
+          <button class="btn secondary" id="downloadBtn">دانلود</button>
+          <button class="btn" id="runBtn">اجرا</button>
+        </div>
+        <div class="output" id="output"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>توضیح ابزار</h3>
+      <div id="toolDesc" class="notice">یک ابزار را انتخاب کنید تا تنظیماتش نمایش داده شود.</div>
+    </div>
+
+    <div class="footer">ساخته شده با عشق به سادگی، خلاقیت و حال خوب ساختن ✨</div>
+  </main>
+</div>
+
+<script>
+/* ---------- Data ---------- */
+const TOOLS = [
+  {id:'prompt_pro', name:'تولید پرامپت حرفه‌ای', ico:'🧪', desc:'ساخت پرامپت دقیق با ساختار نقش، هدف، محدودیت و لحن.',
+   inputs:[
+     {id:'role', type:'text', label:'نقش مدل', ph:'مثال: کارشناس بازاریابی محتوایی'},
+     {id:'goal', type:'text', label:'هدف', ph:'مثال: افزایش نرخ تبدیل صفحه محصول'},
+     {id:'tone', type:'select', label:'لحن', options:['خنثی','رسمی','دوستانه','قانع‌کننده','تخصصی']},
+     {id:'constraints', type:'text', label:'قیود', ph:'مثال: حداکثر 150 کلمه، نکات بولت‌پوینت'},
+   ]},
+  {id:'summarize', name:'خلاصه‌ساز متن', ico:'🧾', desc:'خلاصه فشرده و نکات کلیدی.',
+   inputs:[
+     {id:'ratio', type:'select', label:'شدت خلاصه', options:['ملایم','متوسط','فشرده']},
+     {id:'bullets', type:'select', label:'نمایش', options:['پاراگراف','بولت‌پوینت']}
+   ]},
+  {id:'paraphrase', name:'بازنویسی خلاقانه', ico:'🎨', desc:'بازنویسی با حفظ معنا و افزایش روانی.',
+   inputs:[ {id:'creativity', type:'select', label:'خلاقیت', options:['کم','متوسط','زیاد']} ]},
+  {id:'tone', name:'تغییر لحن', ico:'🎚️', desc:'تبدیل لحن متن (رسمی/دوستانه/قانع‌کننده/تخصصی).',
+   inputs:[ {id:'tone', type:'select', label:'لحن', options:['رسمی','دوستانه','قانع‌کننده','تخصصی']} ]},
+  {id:'keywords', name:'استخراج کلمات کلیدی', ico:'🔑', desc:'واژگان مهم و عبارت‌های کلیدی.',
+   inputs:[ {id:'count', type:'number', label:'تعداد', ph:'10'} ]},
+  {id:'sentiment', name:'تحلیل احساسات', ico:'💡', desc:'مثبت/منفی/خنثی + نمره.',
+   inputs:[]},
+  {id:'title', name:'تولید عنوان جذاب', ico:'🏷️', desc:'۵ عنوان کوتاه و گیراتر.',
+   inputs:[ {id:'style', type:'select', label:'سبک', options:['اکتشافی','مستقیم','لیست‌وار','سوالی','احساسی']} ]},
+  {id:'outline', name:'ساختاردهی (Outline)', ico:'🧱', desc:'سرفصل‌ها و زیربخش‌ها.',
+   inputs:[ {id:'depth', type:'select', label:'عمق', options:['کوتاه','متوسط','عمیق']} ]},
+  {id:'brainstorm', name:'طوفان فکری ایده‌ها', ico:'⚡', desc:'۱۰ ایده کاربردی.',
+   inputs:[ {id:'angle', type:'select', label:'رویکرد', options:['نوآورانه','عملی','کم‌هزینه','داده‌محور']} ]},
+  {id:'qa', name:'پرسش‌وپاسخ از متن', ico:'❓', desc:'پاسخ استخراجی از متن.',
+   inputs:[ {id:'question', type:'text', label:'سؤال', ph:'سؤال خود را بنویسید'} ]},
+  {id:'translate', name:'ترجمه سریع (فا↔انگ)', ico:'🌐', desc:'ترجمه سبک و سریع.',
+   inputs:[ {id:'dir', type:'select', label:'جهت', options:['FA→EN','EN→FA']} ]},
+  {id:'email', name:'تولید ایمیل', ico:'✉️', desc:'ایمیل حرفه‌ای با سلام و پایان.',
+   inputs:[ {id:'purpose', type:'select', label:'هدف', options:['درخواست','پیگیری','معرفی','عذرخواهی','تبریک']} ]},
+  {id:'img_prompt', name:'پرامپت تصویر', ico:'🖼️', desc:'پرامپت غنی برای مدل‌های تصویری.',
+   inputs:[ {id:'style', type:'select', label:'سبک', options:['واقع‌گرایانه','سینماتیک','مینیمال','ایزومتریک','سورئال']} ]},
+  {id:'tweet', name:'پست کوتاه/توییت', ico:'🐦', desc:'۳ نسخه متفاوت زیر ۲۸۰ کاراکتر.',
+   inputs:[ {id:'vibe', type:'select', label:'حس‌وحال', options:['اطلاعی','انگیزشی','تعاملی','طنز']} ]},
+  {id:'product', name:'توضیحات محصول', ico:'🛒', desc:'فروش‌محور با مزیت‌ها.',
+   inputs:[ {id:'aud', type:'select', label:'مخاطب', options:['عمومی','B2B','تازه‌کار','حرفه‌ای']} ]},
+  {id:'bullets', name:'نکات کلیدی بولت‌پوینت', ico:'📌', desc:'۵-۸ گلوله خلاصه.',
+   inputs:[]},
+  {id:'checklist', name:'چک‌لیست از متن', ico:'☑️', desc:'کارهای انجام‌دادنی قابل تیک.',
+   inputs:[]},
+  {id:'naming', name:'نام‌گذاری برند/محصول', ico:'🧩', desc:'۱۰ نام + معیار انتخاب.',
+   inputs:[ {id:'flavor', type:'select', label:'طعم برند', options:['پریمیوم','دوستانه','فناورانه','خلاق']} ]},
+  {id:'ner', name:'استخراج موجودیت‌ها', ico:'🧭', desc:'نام‌ها، سازمان‌ها، تاریخ‌ها.',
+   inputs:[]},
+  {id:'classify', name:'طبقه‌بندی با برچسب سفارشی', ico:'🏷️', desc:'انتخاب برچسب بر اساس کلیدواژه‌ها.',
+   inputs:[ {id:'labels', type:'text', label:'برچسب‌ها (label:کلمات)', ph:'مثال: مثبت:خوب،عالی | منفی:بد،ضعیف'} ]},
+];
+
+/* ---------- DOM ---------- */
+const tasksEl = document.getElementById('tasks');
+const searchEl = document.getElementById('search');
+const inputTextEl = document.getElementById('inputText');
+const dynamicInputsEl = document.getElementById('dynamicInputs');
+const toolDescEl = document.getElementById('toolDesc');
+const outputEl = document.getElementById('output');
+const runBtn = document.getElementById('runBtn');
+const copyBtn = document.getElementById('copyBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const exportBtn = document.getElementById('exportBtn');
+const importBtn = document.getElementById('importBtn');
+const clearBtn = document.getElementById('clearBtn');
+const engineModeEl = document.getElementById('engineMode');
+const llmFieldsEl = document.getElementById('llmFields');
+const apiBaseEl = document.getElementById('apiBase');
+const apiModelEl = document.getElementById('apiModel');
+const apiKeyEl = document.getElementById('apiKey');
+const modeLabelEl = document.getElementById('modeLabel');
+const statusEl = document.getElementById('status');
+
+let state = { tool: TOOLS[0].id, inputs: {}, history: [] };
+
+/* ---------- UI Builders ---------- */
+function renderTaskList(filter=''){
+  tasksEl.innerHTML = '';
+  TOOLS.filter(t => (t.name+t.desc).includes(filter)).forEach(t=>{
+    const d = document.createElement('button');
+    d.className = 'task' + (state.tool===t.id? ' active':'');
+    d.innerHTML = `
+      <div class="ico">${t.ico}</div>
+      <div>
+        <div class="name">${t.name}</div>
+        <div class="desc">${t.desc}</div>
+      </div>`;
+    d.onclick=()=>{ state.tool = t.id; renderTaskList(searchEl.value); renderDynamicInputs(); outputEl.textContent=''; toolDescEl.textContent=t.desc; };
+    tasksEl.appendChild(d);
+  });
+}
+function renderDynamicInputs(){
+  dynamicInputsEl.innerHTML = '';
+  const tool = TOOLS.find(x=>x.id===state.tool);
+  toolDescEl.textContent = tool.desc;
+  (tool.inputs||[]).forEach(inp=>{
+    const wrap = document.createElement('div'); wrap.style.flex='1';
+    const label = document.createElement('label'); label.textContent = inp.label; label.style.display='block'; label.style.fontSize='12px'; label.style.color='var(--sub)';
+    let el;
+    if(inp.type==='select'){
+      el = document.createElement('select');
+      inp.options.forEach(o=>{ const opt=document.createElement('option'); opt.value=o; opt.textContent=o; el.appendChild(opt);});
+    }else if(inp.type==='number'){
+      el = document.createElement('input'); el.type='number'; el.placeholder=inp.ph||'';
+    }else{
+      el = document.createElement('input'); el.type='text'; el.placeholder=inp.ph||'';
+    }
+    el.value = state.inputs[inp.id] || '';
+    el.oninput = (e)=>{ state.inputs[inp.id]=e.target.value; };
+    wrap.appendChild(label); wrap.appendChild(el);
+    dynamicInputsEl.appendChild(wrap);
+  });
+}
+function setStatus(msg){ statusEl.textContent = msg; }
+
+/* ---------- Helpers (Local Heuristics) ---------- */
+const stopWordsFA = 'از را که به برای و در با این آن یک های می بر تا اما اگر است بین یا ها شدن کردن شدنِ شدنِی چون زیرا وقتی هر نیز چرا زیرا لذا بلکه باید بوده بودند بوده‌ام نمود'.split(' ');
+const stopWordsEN = 'the a an of in on at to for and or is are be been by with from as this that those these it its into over under while if so because therefore hence but not only just very really about around across'.split(' ');
+
+function sents(text){
+  return text.split(/(?<=[.!؟\?\n])\s+/).map(s=>s.trim()).filter(Boolean);
+}
+function words(text){
+  return text.toLowerCase().replace(/[^\p{L}\p{N}\s\-]/gu,' ').split(/\s+/).filter(Boolean);
+}
+function topKeywords(text, k=10){
+  const ws = words(text).filter(w=>!stopWordsFA.includes(w)&&!stopWordsEN.includes(w));
+  const freq = {}; ws.forEach(w=>freq[w]=(freq[w]||0)+1);
+  return Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,k).map(([w,c])=>({w,c}));
+}
+function summarize(text, level='متوسط', bullets=false){
+  const ss = sents(text);
+  if(ss.length<=3) return bullets? '• '+ss.join('\n• '): ss.join(' ');
+  const kws = topKeywords(text, 12).map(x=>x.w);
+  const score = s=>kws.reduce((acc,k)=>acc+(s.toLowerCase().includes(k)?1:0),0)+(s.length<140?0.2:0);
+  const ranked = ss.map(s=>({s,score:score(s)})).sort((a,b)=>b.score-a.score);
+  const pick = level==='فشرده'? Math.max(3, Math.round(ss.length*0.2))
+              : level==='ملایم'? Math.max(3, Math.round(ss.length*0.5))
+              : Math.max(4, Math.round(ss.length*0.33));
+  const chosen = ranked.slice(0,pick).map(o=>o.s);
+  return bullets? '• '+chosen.join('\n• ') : chosen.join(' ');
+}
+function paraphrase(text, creativity='متوسط'){
+  // ساده: جابه‌جایی، هم‌معنی‌های رایج، کوتاه‌سازی
+  const map = {
+    'است':'می‌باشد', 'می‌باشد':'است', 'می‌تواند':'قادر است', 'بسیار':'خیلی',
+    'مهم':'کلیدی', 'زیرا':'چون', 'اما':'با این حال', 'کاربردی':'عملی', 'چالش':'مسأله'
+  };
+  let out = text.replace(/\b\w+\b/gu, (w)=>{
+    if(Math.random()< (creativity==='زیاد'?0.25:creativity==='کم'?0.05:0.12) && map[w]) return map[w];
+    return w;
+  });
+  // کوتاه‌سازی جملات بلند
+  out = sents(out).map(s=>{
+    if(s.length>220) return s.replace(/،/g,'، ').split('، ').slice(0,3).join('، ')+'…';
+    return s;
+  }).join(' ');
+  return out;
+}
+function changeTone(text, tone){
+  const pre = {
+    'رسمی':'با لحن رسمی و نوشتاری:',
+    'دوستانه':'با لحن دوستانه، صمیمی و روان:',
+    'قانع‌کننده':'با لحن قانع‌کننده و نتیجه‌محور:',
+    'تخصصی':'با لحن تخصصی و دقیق:'
+  }[tone]||'';
+  return `${pre}\n${paraphrase(text,'کم')}`;
+}
+function sentiment(text){
+  const pos = ['عالی','خوب','موفق','برتر','دوست‌داشتنی','شاد','راضی','بهبود','سریع','کارآمد','recommend','great','good','love','happy','win','fast','efficient'];
+  const neg = ['بد','ضعیف','مشکل','خراب','ناراضی','کُند','گرون','ناامید','نفرت','بدتر','error','bug','slow','hate','fail','expensive'];
+  const t = text.toLowerCase();
+  let p=0,n=0;
+  pos.forEach(k=>{ if(t.includes(k.toLowerCase())) p++; });
+  neg.forEach(k=>{ if(t.includes(k.toLowerCase())) n++; });
+  const score = (p - n) / Math.max(1, p+n);
+  const label = score>0.15? 'مثبت' : score<-0.15? 'منفی' : 'خنثی';
+  return {label, score: Number(score.toFixed(2)), pos:p, neg:n};
+}
+function title5(text, style){
+  const base = topKeywords(text,6).map(x=>x.w);
+  const hook = {
+    'اکتشافی':'آنچه باید بدانید',
+    'مستقیم':'راهنمای جامع',
+    'لیست‌وار':'۱۰ نکته طلایی',
+    'سوالی':'چطور و چرا',
+    'احساسی':'رازهایی که کسی نمی‌گوید'
+  }[style]||'راهنمای کاربردی';
+  const caps = s=>s.replace(/\b\w/g, c=>c.toUpperCase());
+  const head = caps(base.slice(0,2).join(' '));
+  return [
+    `${head}: ${hook}`,
+    `${hook} درباره ${base.slice(0,1)[0]||'موضوع شما'}`,
+    `از صفر تا صد ${base.slice(0,2).join(' ')||'موضوع'}`,
+    `${base.slice(0,1)[0]||'ایده‌ها'} در عمل: ${hook}`,
+    `چطور ${base.slice(0,1)[0]||'هدف'} را سریع‌تر محقق کنیم`
+  ].map(x=>x.replace(/\s+/g,' ').trim());
+}
+function outline(text, depth='متوسط'){
+  const ks = topKeywords(text,8).map(x=>x.w);
+  const H2 = ks.slice(0,4).map((k,i)=>`${i+1}. ${k}`);
+  const h3 = (k)=>['تعریف و اهمیت','روش‌ها','نمونه‌ها','چالش‌ها','جمع‌بندی'];
+  const lines = [];
+  H2.forEach((h,idx)=>{
+    lines.push(`بخش ${idx+1}: ${h.replace(/^\d+\. /,'')}`);
+    const subs = depth==='عمیق'? h3().concat(['منابع','چک‌لیست'])
+               : depth==='کوتاه'? h3().slice(0,3)
+               : h3();
+    subs.forEach(s=>lines.push(`  - ${s}`));
+  });
+  return lines.join('\n');
+}
+function ideas(text, angle='نوآورانه'){
+  const base = topKeywords(text,5).map(x=>x.w);
+  const tag = angle==='عملی'? 'کم‌ریسک' : angle==='کم‌هزینه'? 'ارزان' : angle==='داده‌محور'? 'Data-driven' : 'نوآورانه';
+  return Array.from({length:10}, (_,i)=>`${i+1}. ایده ${tag}: استفاده از ${base[i%base.length]||'نکته'} برای خلق ارزش`).join('\n');
+}
+function qa(text, question){
+  const qs = words(question).filter(w=>!stopWordsFA.includes(w)&&!stopWordsEN.includes(w));
+  const ss = sents(text);
+  const score = (s)=>qs.reduce((a,k)=>a+(s.toLowerCase().includes(k)?1:0),0);
+  const best = ss.map(s=>({s,score:score(s)})).sort((a,b)=>b.score-a.score)[0];
+  return best && best.score>0? best.s : 'پاسخ صریحی در متن یافت نشد. شاید لازم است متن بیشتری بدهید.';
+}
+function translate(text, dir){
+  // بسیار ساده و سبک — برای کیفیت بالا از حالت LLM استفاده کنید
+  const dictFAEN = {'سلام':'hello','دنیا':'world','محصول':'product','کاربر':'user','سرعت':'speed','کیفیت':'quality','خدمات':'service','قیمت':'price','بازار':'market','هوش مصنوعی':'artificial intelligence','داده':'data','تحلیل':'analysis'};
+  if(dir==='FA→EN'){
+    let out = text;
+    Object.entries(dictFAEN).forEach(([fa,en])=>{
+      out = out.replace(new RegExp(fa,'g'), en);
+    });
+    return out.split(' ').map(w=>w==='و'?',':w).join(' ');
+  }else{
+    let out = text.toLowerCase();
+    Object.entries(dictFAEN).forEach(([fa,en])=>{
+      out = out.replace(new RegExp(`\\b${en}\\b`,'g'), fa);
+    });
+    return out.replace(/, /g,' و ').replace(/\bthe\b/g,'').trim();
+  }
+}
+function email(text, purpose){
+  const greet = 'سلام و احترام،';
+  const end = 'با سپاس\n[نام شما]';
+  const purposeLine = {
+    'درخواست':'درخواست دارم در خصوص موضوع زیر همکاری بفرمایید:',
+    'پیگیری':'در ادامه‌ی مکاتبات قبلی، پیگیر وضعیت موضوع زیر هستم:',
+    'معرفی':'مایلم مورد زیر را معرفی کنم:',
+    'عذرخواهی':'برای موارد رخ‌داده پوزش می‌طلبم. جزئیات:',
+    'تبریک':'تبریک صمیمانه بابت موفقیت اخیر شما! چند نکته:'
+  }[purpose] || 'در خصوص موضوع زیر:';
+  return `${greet}\n${purposeLine}\n\n${text}\n\nاگر نکته‌ای هست خوشحال می‌شوم بدانم.\n${end}`;
+}
+function imgPrompt(text, style){
+  const details = ['lighting: soft', 'high detail', 'rich colors', 'ultra realistic', 'sharp focus', 'depth of field'];
+  const aspect = '–ar 3:2';
+  const s = {
+    'واقع‌گرایانه':'photorealistic, 50mm lens',
+    'سینماتیک':'cinematic, anamorphic, moody lighting',
+    'مینیمال':'minimal, clean composition, negative space',
+    'ایزومتریک':'isometric, vector, crisp lines',
+    'سورئال':'surreal, dreamlike, unexpected juxtapositions'
+  }[style] || 'stylized';
+  return `Subject: ${text}\nStyle: ${s}\nDetails: ${details.slice(0,4).join(', ')}\nQuality: 8k, HDR ${aspect}`;
+}
+function tweet(text, vibe){
+  const tags = topKeywords(text,4).map(k=>'#'+k).join(' ');
+  const tones = {
+    'اطلاعی':'خبر کوتاه',
+    'انگیزشی':'یک قدم بردار',
+    'تعاملی':'نظر تو چیه؟',
+    'طنز':'لبخند بزن'
+  };
+  const base = tones[vibe] || 'حس خوب';
+  const variants = [
+    `${base}: ${text}`.slice(0,240),
+    `${text} — ${tags}`.slice(0,260),
+    `${base} | ${tags} | ${text}`.slice(0,270)
+  ];
+  return variants.map((t,i)=>`[${i+1}] ${t}`).join('\n');
+}
+function productDesc(text, aud){
+  const bullets = [
+    'مزیت کلیدی ۱: '+ (topKeywords(text,1)[0]?.w || 'کیفیت بالا'),
+    'مزیت کلیدی ۲: '+ (topKeywords(text,2)[1]?.w || 'استفاده آسان'),
+    'مزیت کلیدی ۳: '+ (topKeywords(text,3)[2]?.w || 'صرفه‌جویی در زمان')
+  ];
+  const tone = aud==='B2B'?'رسمی و مبتنی بر ارزش تجاری':
+               aud==='تازه‌کار'?'ساده و آموزشی':
+               aud==='حرفه‌ای'?'تخصصی و دقیق':'عمومی و روان';
+  return `برای مخاطب ${aud} با لحن ${tone}:\n${text}\n\nویژگی‌ها:\n- ${bullets.join('\n- ')}`;
+}
+function bullets(text){
+  const ks = topKeywords(text,8).map(x=>x.w);
+  const ss = sents(text);
+  const picks = ss.slice(0,2).concat(ss.filter(s=>ks.some(k=>s.toLowerCase().includes(k))).slice(0,6));
+  const uniq = Array.from(new Set(picks));
+  return uniq.map(s=>'• '+s).join('\n');
+}
+function checklist(text){
+  const ks = topKeywords(text,10).map(x=>x.w);
+  const ss = sents(text);
+  const items = ss.filter(s=>/باید|حتماً|مرحله|گام|نکته|اجرا|انجام/u.test(s) || ks.some(k=>s.toLowerCase().includes(k))).slice(0,10);
+  return items.map(s=>`[ ] ${s.replace(/[.!؟]$/,'')}`).join('\n');
+}
+function naming(text, flavor){
+  const base = topKeywords(text,6).map(x=>x.w);
+  const add = {'پریمیوم':'lux','دوستانه':'buddy','فناورانه':'nova','خلاق':'spark'}[flavor]||'core';
+  const names = Array.from({length:10},(_,i)=>{
+    const a = base[i%base.length]||'nova';
+    const b = add;
+    return (a.slice(0,6)+b).replace(/[^a-zA-Z\u0600-\u06FF]/g,'');
+  });
+  const criteria = '- کوتاه و به‌یادماندنی\n- قابل ثبت دامنه\n- بدون بار منفی فرهنگی\n- تلفظ آسان';
+  return names.map((n,i)=>`${i+1}. ${n}`).join('\n') + `\n\nمعیار انتخاب:\n${criteria}`;
+}
+function ner(text){
+  const names = Array.from(text.matchAll(/\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)\b/g)).map(m=>m[0]);
+  const dates = Array.from(text.matchAll(/\b(20\d{2}|13\d{2}|14\d{2})\b/g)).map(m=>m[0]);
+  const orgs = Array.from(text.matchAll(/\b([A-Z]{2,})\b/g)).map(m=>m[0]);
+  return `نام‌ها: ${Array.from(new Set(names)).slice(0,10).join(', ')||'-'}\nسازمان‌ها: ${Array.from(new Set(orgs)).slice(0,10).join(', ')||'-'}\nتاریخ/سال: ${Array.from(new Set(dates)).slice(0,10).join(', ')||'-'}`;
+}
+function classify(text, labelsStr){
+  // فرمت: مثبت:خوب،عالی | منفی:بد،ضعیف
+  const labels = labelsStr.split('|').map(s=>s.trim()).filter(Boolean).map(pair=>{
+    const [lab, keys] = pair.split(':').map(x=>x.trim());
+    const arr = (keys||'').split(/[،,]/).map(x=>x.trim()).filter(Boolean);
+    return {lab, arr};
+  });
+  const t = text.toLowerCase();
+  const scored = labels.map(l=>({label:l.lab, score: l.arr.reduce((a,k)=>a+(t.includes(k.toLowerCase())?1:0),0)}));
+  const best = scored.sort((a,b)=>b.score-a.score)[0];
+  if(!best || best.score===0) return 'برچسب قطعی پیدا نشد.';
+  return `برچسب: ${best.label} (امتیاز: ${best.score})`;
+}
+
+/* ---------- LLM Bridge (OpenAI-compatible) ---------- */
+async function callLLM({system, instruction, text}){
+  const base = (apiBaseEl.value||'').replace(/\/$/,'');
+  const model = apiModelEl.value;
+  const key = apiKeyEl.value;
+  if(!base || !model || !key) throw new Error('Missing LLM config');
+  const body = {
+    model,
+    messages: [
+      {role:'system', content: system},
+      {role:'user', content: `${instruction}\n\n---\n${text}`}
+    ],
+    temperature: 0.4
+  };
+  const res = await fetch(`${base}/v1/chat/completions`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){
+    const t = await res.text();
+    throw new Error(`HTTP ${res.status}: ${t}`);
+  }
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content?.trim() || '';
+}
+
+/* ---------- Runner ---------- */
+async function run(){
+  const tool = TOOLS.find(x=>x.id===state.tool);
+  const text = (inputTextEl.value||'').trim();
+  setStatus('در حال اجرا…');
+  outputEl.textContent='در حال پردازش…';
+  const mode = engineModeEl.value;
+  let out = '';
+  try{
+    if(mode==='local'){
+      out = runLocal(tool, text);
+    }else{
+      const {system, instruction} = promptForTool(tool, state.inputs);
+      out = await callLLM({system, instruction, text});
+    }
+    outputEl.textContent = out;
+    setStatus('آماده');
+    state.history.push({time:Date.now(), tool:tool.id, input:text, inputs:{...state.inputs}, output:out});
+  }catch(e){
+    outputEl.textContent = 'خطا: '+ e.message;
+    setStatus('خطا');
+  }
+}
+/* ---------- Prompts for LLM Mode ---------- */
+function promptForTool(tool, inputs){
+  const sys = 'You are a precise, helpful assistant writing fluent Persian unless asked otherwise. Keep answers clean, structured, and to-the-point.';
+  const instMap = {
+    'prompt_pro': `با استفاده از الگوی زیر یک پرامپت حرفه‌ای بساز:\nRole: ${inputs.role||'متخصص'}\nGoal: ${inputs.goal||'بهترین نتیجه'}\nTone: ${inputs.tone||'خنثی'}\nConstraints: ${inputs.constraints||'حجم مناسب'}\nاز متن کاربر به‌عنوان زمینه استفاده کن و پرامپت نهایی را در یک بلوک واحد بازگردان.`,
+    'summarize': `متن را با شدت "${inputs.ratio||'متوسط'}" خلاصه کن و به صورت ${inputs.bullets==='بولت‌پوینت'?'بولت‌پوینت':'پاراگراف'} ارائه بده.`,
+    'paraphrase': `متن را با خلاقیت ${inputs.creativity||'متوسط'}، با حفظ معنا بازنویسی کن.`,
+    'tone': `متن را به لحن "${inputs.tone||'رسمی'}" تبدیل کن.`,
+    'keywords': `بهترین ${(inputs.count||10)} کلمه/عبارت کلیدی متن را استخراج و به‌ترتیب اهمیت فهرست کن.`,
+    'sentiment': `تحلیل احساسات انجام بده (مثبت/منفی/خنثی) و یک نمره -1 تا 1 بده و شواهد را بگو.`,
+    'title': `۵ عنوان کوتاه و گیرای سبک "${inputs.style||'مستقیم'}" پیشنهاد بده.`,
+    'outline': `Outline با عمق "${inputs.depth||'متوسط'}" تولید کن (H2/H3).`,
+    'brainstorm': `۱۰ ایده "${inputs.angle||'نوآورانه'}" پیشنهاد بده، مشخص و قابل‌اجرا.`,
+    'qa': `فقط پاسخ دقیق به این سؤال را از متن استخراج کن: ${inputs.question||''}`,
+    'translate': `${(inputs.dir||'FA→EN')==='FA→EN'?'متن را روان به انگلیسی':'متن را روان به فارسی'} ترجمه کن.`,
+    'email': `ایمیل حرفه‌ای با هدف "${inputs.purpose||'درخواست'}" بنویس. سلام و پایان محترمانه داشته باشد.`,
+    'img_prompt': `یک پرامپت تصویری ${inputs.style||'واقع‌گرایانه'} بساز با توضیح موضوع، سبک، جزئیات و کیفیت.`,
+    'tweet': `۳ نسخه پست کوتاه کمتر از ۲۸۰ کاراکتر با حس "${inputs.vibe||'اطلاعی'}" ارائه بده.`,
+    'product': `توضیح محصول فروش‌محور برای مخاطب "${inputs.aud||'عمومی'}" تولید کن: مزایا و ویژگی‌ها.`,
+    'bullets': `نکات کلیدی متن را در ۵ تا ۸ بولت‌پوینت خلاصه کن.`,
+    'checklist': `متن را به چک‌لیستی از کارهای قابل انجام تبدیل کن (جملات کوتاه).`,
+    'naming': `۱۰ نام برند/محصول با طعم "${inputs.flavor||'فناورانه'}" پیشنهاد بده و معیار انتخاب را بگو.`,
+    'ner': `موجودیت‌ها (نام، سازمان، تاریخ) را استخراج و فهرست کن.`,
+    'classify': `با برچسب‌های ${inputs.labels||'مثبت/منفی/خنثی'} متن را طبقه‌بندی کن و دلیل کوتاه بیاور.`
+  };
+  return { system: sys, instruction: instMap[tool.id] || 'متن را به بهترین شکل پردازش کن.' };
+}
+
+/* ---------- Local Runner ---------- */
+function runLocal(tool, text){
+  const g = state.inputs;
+  switch(tool.id){
+    case 'prompt_pro':
+      return `SYSTEM: شما ${g.role||'متخصص'} هستید.\nGOAL: ${g.goal||'حصول بهترین خروجی'}\nTONE: ${g.tone||'خنثی'}\nCONSTRAINTS: ${g.constraints||'مختصر، واضح'}\n\nPROMPT:\n${text}\n\nراهنما: پاسخ را دقیق، مرحله‌به‌مرحله و با مثال ارائه بده.`;
+    case 'summarize':
+      return summarize(text, g.ratio||'متوسط', (g.bullets||'پاراگراف')==='بولت‌پوینت');
+    case 'paraphrase':
+      return paraphrase(text, g.creativity||'متوسط');
+    case 'tone':
+      return changeTone(text, g.tone||'رسمی');
+    case 'keywords':
+      return topKeywords(text, Number(g.count||10)).map((o,i)=>`${i+1}. ${o.w} (${o.c})`).join('\n');
+    case 'sentiment':
+      const s = sentiment(text);
+      return `نتیجه: ${s.label}\nنمره: ${s.score}\nمثبت‌ها: ${s.pos} | منفی‌ها: ${s.neg}`;
+    case 'title':
+      return title5(text, g.style||'مستقیم').join('\n');
+    case 'outline':
+      return outline(text, g.depth||'متوسط');
+    case 'brainstorm':
+      return ideas(text, g.angle||'نوآورانه');
+    case 'qa':
+      return qa(text, g.question||'');
+    case 'translate':
+      return translate(text, g.dir||'FA→EN');
+    case 'email':
+      return email(text, g.purpose||'درخواست');
+    case 'img_prompt':
+      return imgPrompt(text, g.style||'واقع‌گرایانه');
+    case 'tweet':
+      return tweet(text, g.vibe||'اطلاعی');
+    case 'product':
+      return productDesc(text, g.aud||'عمومی');
+    case 'bullets':
+      return bullets(text);
+    case 'checklist':
+      return checklist(text);
+    case 'naming':
+      return naming(text, g.flavor||'فناورانه');
+    case 'ner':
+      return ner(text);
+    case 'classify':
+      return classify(text, g.labels||'مثبت:خوب،عالی | منفی:بد،ضعیف | خنثی:معمولی،عادی');
+    default:
+      return 'ابزار نامعتبر است.';
+  }
+}
+
+/* ---------- Events ---------- */
+renderTaskList();
+renderDynamicInputs();
+document.addEventListener('DOMContentLoaded', ()=>{
+  toolDescEl.textContent = TOOLS[0].desc;
+});
+
+searchEl.oninput = (e)=>renderTaskList(e.target.value.trim());
+
+engineModeEl.onchange = ()=>{
+  const show = engineModeEl.value!=='local';
+  llmFieldsEl.style.display = show? 'block':'none';
+  modeLabelEl.textContent = show? 'LLM' : 'محلی';
+};
+
+runBtn.onclick = run;
+
+copyBtn.onclick = async ()=>{
+  await navigator.clipboard.writeText(outputEl.textContent||'');
+  setStatus('کپی شد!');
+  setTimeout(()=>setStatus('آماده'), 1200);
+};
+downloadBtn.onclick = ()=>{
+  const blob = new Blob([outputEl.textContent||''], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ai-output-${state.tool}.txt`;
+  a.click();
+};
+
+exportBtn.onclick = ()=>{
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], {type:'application/json;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ai-studio-state.json'; a.click();
+};
+importBtn.onclick = async ()=>{
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='.json,application/json';
+  inp.onchange = async ()=>{
+    const file = inp.files[0]; const txt = await file.text();
+    try{ const obj = JSON.parse(txt); state = {...state, ...obj}; renderTaskList(searchEl.value); renderDynamicInputs(); setStatus('وارد شد'); }catch{ setStatus('JSON نامعتبر'); }
+  };
+  inp.click();
+};
+clearBtn.onclick = ()=>{
+  inputTextEl.value=''; outputEl.textContent=''; state.inputs={}; renderDynamicInputs(); setStatus('پاک شد');
+};
+</script>
+</body>
+</html>
